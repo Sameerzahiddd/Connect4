@@ -136,6 +136,32 @@ class GUI:
             
             screen.blit(text, (10, 10))
     
+    def draw_winning_line(self, screen):
+        """Draw a line connecting the winning pieces."""
+        if self.game.winner is not None and self.game.winner > 0:  # Don't draw for draws
+            # Get the winning pieces
+            winning_pieces = self.game.board.winning_pieces
+            
+            if winning_pieces and len(winning_pieces) >= 4:
+                # Sort pieces to ensure consistent line direction
+                winning_pieces.sort()
+                
+                # Convert board coordinates to screen coordinates
+                screen_coords = []
+                for row, col in winning_pieces[:4]:  # Just use the first 4 winning pieces
+                    x = col * self.SQUARE_SIZE + self.SQUARE_SIZE // 2
+                    y = (row + 1) * self.SQUARE_SIZE + self.SQUARE_SIZE // 2
+                    screen_coords.append((x, y))
+                
+                # Draw a thick black line connecting the centers of the pieces
+                if len(screen_coords) >= 2:
+                    pygame.draw.line(
+                        screen,
+                        self.BLACK,
+                        screen_coords[0],
+                        screen_coords[3],
+                        width=5
+                    )
     def draw(self, screen):
         """Draw the complete game UI."""
         # Fill background
@@ -146,6 +172,9 @@ class GUI:
         
         # Draw piece preview
         self.draw_piece_preview(screen)
+        
+        # Draw winning line (add this line)
+        self.draw_winning_line(screen)
         
         # Draw turn indicator
         self.draw_turn_indicator(screen)
