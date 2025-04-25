@@ -80,47 +80,59 @@ class GUI:
                 )
     
     def draw_winner_message(self, screen):
-        """Draw the winner message."""
+        """Draw the winner message above the board."""
         if self.game.winner is not None:
-            # Background for the message
+            # Background for the message - place it above the board
             pygame.draw.rect(
                 screen,
                 (200, 200, 200),
-                (self.WIDTH // 4, self.HEIGHT // 3, self.WIDTH // 2, self.HEIGHT // 3),
-                border_radius=10
+                (0, 0, self.WIDTH, self.SQUARE_SIZE),
+                border_radius=0
             )
             
             # Winner message
             if self.game.winner == 0:
-                text = self.large_font.render("Draw!", True, self.BLACK)
+                text = self.font.render("Game Over: Draw!", True, self.BLACK)
             elif self.game.winner == 1:
-                text = self.large_font.render("You Win!", True, self.RED)
+                if self.game.battle_mode:
+                    text = self.font.render(f"Game Over: {self.game.first_ai.capitalize()} Wins!", True, self.RED)
+                else:
+                    text = self.font.render("Game Over: You Win!", True, self.RED)
             else:
-                text = self.large_font.render("AI Wins!", True, self.YELLOW)
+                if self.game.battle_mode:
+                    text = self.font.render(f"Game Over: {self.game.second_ai.capitalize()} Wins!", True, self.YELLOW)
+                else:
+                    text = self.font.render(f"Game Over: {self.game.ai_type.capitalize()} Wins!", True, self.YELLOW)
             
-            # Center the text
+            # Center the text horizontally, position it higher in the top bar
             text_rect = text.get_rect(
-                center=(self.WIDTH // 2, self.HEIGHT // 2 - 20)
+                center=(self.WIDTH // 2, self.SQUARE_SIZE // 3)
             )
             screen.blit(text, text_rect)
             
-            # Restart instruction
+            # Restart instruction - center below the winner message
             restart_text = self.font.render("Press 'R' to Restart", True, self.BLACK)
             restart_rect = restart_text.get_rect(
-                center=(self.WIDTH // 2, self.HEIGHT // 2 + 40)
+                center=(self.WIDTH // 2, self.SQUARE_SIZE * 2 // 3)
             )
             screen.blit(restart_text, restart_rect)
-    
+        
     def draw_turn_indicator(self, screen):
         """Draw an indicator of whose turn it is."""
         if self.game.winner is None:
-            if self.game.current_player == self.game.HUMAN_PLAYER:
+            if self.game.battle_mode:
+                # AI vs AI mode
+                current_ai = self.game.first_ai if self.game.current_player == 1 else self.game.second_ai
+                text = self.font.render(f"{current_ai.capitalize()} AI is thinking...", True, 
+                                        self.RED if self.game.current_player == 1 else self.YELLOW)
+            elif self.game.current_player == self.game.HUMAN_PLAYER:
                 text = self.font.render("Your Turn", True, self.RED)
             else:
+                ai_type = self.game.ai_type.capitalize()
                 if self.game.ai_thinking:
-                    text = self.font.render("AI is thinking...", True, self.YELLOW)
+                    text = self.font.render(f"{ai_type} AI is thinking...", True, self.YELLOW)
                 else:
-                    text = self.font.render("AI's Turn", True, self.YELLOW)
+                    text = self.font.render(f"{ai_type} AI's Turn", True, self.YELLOW)
             
             screen.blit(text, (10, 10))
     

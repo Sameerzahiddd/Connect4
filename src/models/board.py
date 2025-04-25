@@ -64,50 +64,61 @@ class Board:
         """
         # Check horizontal
         count = 0
-        for c in range(max(0, col - 3), min(col + 4, self.cols)):
+        for c in range(self.cols):
             if self.board[row][c] == player:
                 count += 1
-                if count == 4:
+                if count >= 4:
                     return True
             else:
                 count = 0
         
         # Check vertical
         count = 0
-        for r in range(max(0, row - 3), min(row + 4, self.rows)):
+        for r in range(self.rows):
             if self.board[r][col] == player:
                 count += 1
-                if count == 4:
+                if count >= 4:
                     return True
             else:
                 count = 0
         
         # Check diagonal /
         count = 0
-        for i in range(-3, 4):
-            r = row - i
-            c = col + i
-            if 0 <= r < self.rows and 0 <= c < self.cols and self.board[r][c] == player:
+        # Find the top-left starting point of the diagonal
+        r, c = row, col
+        while r < self.rows - 1 and c > 0:
+            r += 1
+            c -= 1
+        # Check the diagonal
+        while r >= 0 and c < self.cols:
+            if self.board[r][c] == player:
                 count += 1
-                if count == 4:
+                if count >= 4:
                     return True
             else:
                 count = 0
+            r -= 1
+            c += 1
         
         # Check diagonal \
         count = 0
-        for i in range(-3, 4):
-            r = row + i
-            c = col + i
-            if 0 <= r < self.rows and 0 <= c < self.cols and self.board[r][c] == player:
+        # Find the top-right starting point of the diagonal
+        r, c = row, col
+        while r < self.rows - 1 and c < self.cols - 1:
+            r += 1
+            c += 1
+        # Check the diagonal
+        while r >= 0 and c >= 0:
+            if self.board[r][c] == player:
                 count += 1
-                if count == 4:
+                if count >= 4:
                     return True
             else:
                 count = 0
+            r -= 1
+            c -= 1
         
         return False
-    
     def is_winner(self, player):
         """
         Check if the player has won the game.

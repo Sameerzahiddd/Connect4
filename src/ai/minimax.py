@@ -52,7 +52,7 @@ def iterative_deepening_minimax(board, max_depth):
             best_score = score
             best_col = col
     
-    # Save updated history scores
+    # Make sure to save the history scores after each search
     save_history_scores(history_scores)
     
     return best_score, best_col

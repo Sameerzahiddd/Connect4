@@ -1,8 +1,10 @@
 import pygame
 import sys
-import time  # Add this import for the delay
+import time
+import copy
 from src.models.board import Board
-from src.ai.minimax import iterative_deepening_minimax, decay_history_scores
+from src.ai.minimax import iterative_deepening_minimax
+from src.ai.mcts import mcts_search
 from src.gui import GUI
 
 class Game:
@@ -11,20 +13,42 @@ class Game:
     # Constants
     HUMAN_PLAYER = 1
     AI_PLAYER = 2
-    AI_THINKING_TIME = 2  # Add this constant for the delay (in seconds)
+    AI_THINKING_TIME = 2  # Delay in seconds
     
-    def __init__(self):
-        """Initialize the game."""
+    def __init__(self, ai_type="minimax", first_ai=None, second_ai=None):
+        """
+        Initialize the game.
+        
+        Args:
+            ai_type: Type of AI to use ('minimax', 'mcts', or 'battle')
+            first_ai: Type of first AI for battle mode ('minimax' or 'mcts')
+            second_ai: Type of second AI for battle mode ('minimax' or 'mcts')
+        """
         self.board = Board()
+        self.ai_type = ai_type
         self.current_player = self.HUMAN_PLAYER
         self.winner = None
+        self.ai_thinking = False
+        self.ai_start_time = 0
+        
+        # For AI vs AI battle
+        self.battle_mode = (ai_type == "battle")
+        self.first_ai = first_ai
+        self.second_ai = second_ai
+        self.battle_delay = 1.0  # Delay between moves in battle mode (seconds)
+        self.last_move_time = 0
+        
+        # Set up the GUI
         self.gui = GUI(self)
-        self.ai_thinking = False  # Add this flag to track AI thinking state
-        self.ai_start_time = 0    # Add this to track when AI started thinking
         
         # Set up the display
         self.screen = pygame.display.set_mode((self.gui.WIDTH, self.gui.HEIGHT))
-        pygame.display.set_caption('Connect Four AI')
+        
+        # Set the window caption based on game mode
+        if self.battle_mode:
+            pygame.display.set_caption(f'Connect Four: {self.first_ai.capitalize()} vs {self.second_ai.capitalize()}')
+        else:
+            pygame.display.set_caption(f'Connect Four: You vs {self.ai_type.capitalize()}')
     
     def reset(self):
         """Reset the game to the initial state."""
@@ -32,7 +56,6 @@ class Game:
         self.current_player = self.HUMAN_PLAYER
         self.winner = None
         self.ai_thinking = False
-        decay_history_scores()  # Decay history scores between games
     
     def make_move(self, col):
         """
@@ -63,11 +86,20 @@ class Game:
     
     def ai_move(self):
         """Have the AI make a move."""
-        if self.current_player != self.AI_PLAYER or self.winner is not None:
+        if self.winner is not None:
             return False
         
-        # Use minimax to find the best move
-        _, col = iterative_deepening_minimax(self.board, 5)  # Depth 5 is usually good
+        # Determine which AI to use based on current player in battle mode
+        current_ai = self.ai_type
+        if self.battle_mode:
+            current_ai = self.first_ai if self.current_player == 1 else self.second_ai
+        
+        # Get the move from the appropriate AI
+        col = None
+        if current_ai == "minimax":
+            _, col = iterative_deepening_minimax(self.board, 5)
+        elif current_ai == "mcts":
+            col = mcts_search(self.board, iterations=1000, max_time=1.0)
         
         if col is not None:
             return self.make_move(col)
@@ -76,10 +108,10 @@ class Game:
     
     def switch_player(self):
         """Switch to the other player."""
-        self.current_player = self.AI_PLAYER if self.current_player == self.HUMAN_PLAYER else self.HUMAN_PLAYER
+        self.current_player = 3 - self.current_player  # Toggle between 1 and 2
         
-        # If it's now AI's turn, start the thinking timer
-        if self.current_player == self.AI_PLAYER:
+        # If it's now AI's turn (or in battle mode), start the thinking timer
+        if self.current_player == self.AI_PLAYER or self.battle_mode:
             self.ai_thinking = True
             self.ai_start_time = time.time()
     
@@ -90,14 +122,16 @@ class Game:
                 return False
             
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # Human player's turn
-                if self.current_player == self.HUMAN_PLAYER and self.winner is None:
+                # Human player's turn (if not in battle mode)
+                if not self.battle_mode and self.current_player == self.HUMAN_PLAYER and self.winner is None:
                     col = event.pos[0] // self.gui.SQUARE_SIZE
                     self.make_move(col)
             
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:  # Reset game
                     self.reset()
+                elif event.key == pygame.K_ESCAPE:  # Exit to main menu
+                    return False
         
         return True
     
@@ -110,20 +144,48 @@ class Game:
             clock.tick(60)  # 60 FPS
             
             # Handle events
-            running = self.handle_events()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return False
+                
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    # Human player's turn (if not in battle mode)
+                    if not self.battle_mode and self.current_player == self.HUMAN_PLAYER and self.winner is None:
+                        col = event.pos[0] // self.gui.SQUARE_SIZE
+                        self.make_move(col)
+                
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        if self.winner is not None:
+                            # Game is over, return to menu
+                            return True  # This will return to the main menu
+                        else:
+                            # Mid-game reset, just restart
+                            self.reset()
+                    elif event.key == pygame.K_ESCAPE:  # Exit to main menu
+                        return True
             
             # AI's turn with delay
-            if self.current_player == self.AI_PLAYER and self.winner is None:
-                current_time = time.time()
-                
-                if self.ai_thinking:
-                    # Check if AI has "thought" long enough
-                    if current_time - self.ai_start_time >= self.AI_THINKING_TIME:
+            current_time = time.time()
+            
+            if self.winner is None:
+                if self.battle_mode:
+                    # AI vs AI mode - add delay between moves
+                    if current_time - self.last_move_time >= self.battle_delay:
                         self.ai_thinking = False
                         self.ai_move()
-                
+                        self.last_move_time = current_time
+                elif self.current_player == self.AI_PLAYER:
+                    # Human vs AI mode
+                    if self.ai_thinking:
+                        if current_time - self.ai_start_time >= self.AI_THINKING_TIME:
+                            self.ai_thinking = False
+                            self.ai_move()
+            
             # Draw the game
             self.gui.draw(self.screen)
             
             # Update the display
             pygame.display.flip()
+        
+        return False  # This means exit the application
