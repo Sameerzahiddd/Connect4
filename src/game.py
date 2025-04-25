@@ -15,40 +15,46 @@ class Game:
     AI_PLAYER = 2
     AI_THINKING_TIME = 2  # Delay in seconds
     
-    def __init__(self, ai_type="minimax", first_ai=None, second_ai=None):
-        """
-        Initialize the game.
-        
-        Args:
-            ai_type: Type of AI to use ('minimax', 'mcts', or 'battle')
-            first_ai: Type of first AI for battle mode ('minimax' or 'mcts')
-            second_ai: Type of second AI for battle mode ('minimax' or 'mcts')
-        """
-        self.board = Board()
-        self.ai_type = ai_type
-        self.current_player = self.HUMAN_PLAYER
-        self.winner = None
-        self.ai_thinking = False
-        self.ai_start_time = 0
-        
-        # For AI vs AI battle
-        self.battle_mode = (ai_type == "battle")
-        self.first_ai = first_ai
-        self.second_ai = second_ai
-        self.battle_delay = 1.0  # Delay between moves in battle mode (seconds)
-        self.last_move_time = 0
-        
-        # Set up the GUI
-        self.gui = GUI(self)
-        
-        # Set up the display
-        self.screen = pygame.display.set_mode((self.gui.WIDTH, self.gui.HEIGHT))
-        
-        # Set the window caption based on game mode
-        if self.battle_mode:
-            pygame.display.set_caption(f'Connect Four: {self.first_ai.capitalize()} vs {self.second_ai.capitalize()}')
-        else:
-            pygame.display.set_caption(f'Connect Four: You vs {self.ai_type.capitalize()}')
+def __init__(self, ai_type="minimax", first_ai=None, second_ai=None, first_player=1):
+    """
+    Initialize the game.
+    
+    Args:
+        ai_type: Type of AI to use ('minimax', 'mcts', or 'battle')
+        first_ai: Type of first AI for battle mode ('minimax' or 'mcts')
+        second_ai: Type of second AI for battle mode ('minimax' or 'mcts')
+        first_player: Who plays first (1 = Human/Minimax, 2 = AI/MCTS)
+    """
+    self.board = Board()
+    self.ai_type = ai_type
+    self.current_player = first_player  # Set initial player based on parameter
+    self.winner = None
+    self.ai_thinking = False
+    self.ai_start_time = 0
+    
+    # For AI vs AI battle
+    self.battle_mode = (ai_type == "battle")
+    self.first_ai = first_ai
+    self.second_ai = second_ai
+    self.battle_delay = 1.0  # Delay between moves in battle mode (seconds)
+    self.last_move_time = 0
+    
+    # Set up the GUI
+    self.gui = GUI(self)
+    
+    # Set up the display
+    self.screen = pygame.display.set_mode((self.gui.WIDTH, self.gui.HEIGHT))
+    
+    # Set the window caption based on game mode
+    if self.battle_mode:
+        pygame.display.set_caption(f'Connect Four: {self.first_ai.capitalize()} vs {self.second_ai.capitalize()}')
+    else:
+        pygame.display.set_caption(f'Connect Four: You vs {self.ai_type.capitalize()}')
+    
+    # If AI goes first, start the AI thinking timer
+    if (not self.battle_mode and self.current_player == self.AI_PLAYER) or self.battle_mode:
+        self.ai_thinking = True
+        self.ai_start_time = time.time()
     
     def reset(self):
         """Reset the game to the initial state."""
@@ -99,7 +105,7 @@ class Game:
         if current_ai == "minimax":
             _, col = iterative_deepening_minimax(self.board, 5)
         elif current_ai == "mcts":
-            col = mcts_search(self.board, iterations=1000, max_time=1.0)
+            col = mcts_search(self.board, iterations=6000, max_time=5.0)
         
         if col is not None:
             return self.make_move(col)

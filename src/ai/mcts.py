@@ -15,9 +15,10 @@ class MCTSNode:
         self.visits = 0
         self.wins = 0
         self.untried_moves = board.get_valid_moves()
-        self.player = 1 if parent and parent.player == 2 else 2  # Player who will make the next move
+        # Important: Set player correctly based on the board state or parent
+        self.player = board.current_player if hasattr(board, 'current_player') else (1 if parent and parent.player == 2 else 2)
     
-    def uct_select_child(self, exploration_weight=1.0):
+    def uct_select_child(self, exploration_weight=1.41):  # sqrt(2) is a common value
         """Select a child node using the UCT formula."""
         # UCT = win_ratio + exploration_weight * sqrt(ln(parent_visits) / child_visits)
         log_visits = math.log(self.visits) if self.visits > 0 else 0
@@ -29,7 +30,7 @@ class MCTSNode:
         for move, child in self.children.items():
             # Avoid division by zero
             if child.visits == 0:
-                continue
+                return child
                 
             # Win ratio from the perspective of the player who made the move
             win_ratio = child.wins / child.visits
@@ -58,26 +59,33 @@ class MCTSNode:
     def update(self, result):
         """Update the node statistics with the simulation result."""
         self.visits += 1
-        # Win is always tracked from the perspective of player 2 (AI)
-        if result == 2:  # AI (player 2) won
+        
+        # Update wins based on the player's perspective
+        if result == self.player:
             self.wins += 1
+        elif result == 0:  # Draw
+            self.wins += 0.5  # Count draws as half-wins
 
 
-def mcts_search(board, iterations=1000, max_time=None):
+def mcts_search(board, iterations=5000, max_time=2.0):
     """
     Run Monte Carlo Tree Search to find the best move.
     
     Args:
         board: Current board state
         iterations: Maximum number of iterations to run
-        max_time: Maximum search time in seconds (optional)
+        max_time: Maximum search time in seconds
         
     Returns:
         best_move: The best move determined by MCTS
     """
+    # Create a deep copy to avoid modifying the original board
     root = MCTSNode(copy.deepcopy(board))
     
-    # Set time limit if specified
+    # Store whose turn it is at the root (important for simulation)
+    root_player = root.player
+    
+    # Set time limit
     end_time = None
     if max_time:
         end_time = time.time() + max_time
@@ -98,11 +106,16 @@ def mcts_search(board, iterations=1000, max_time=None):
         # 3. Backpropagation
         _backpropagate(node, result)
     
-    # Select the best move based on visit count
+    # Debug information
+    total_simulations = sum(child.visits for child in root.children.values())
+    print(f"MCTS completed {total_simulations} simulations across {len(root.children)} moves")
+    
+    # Select the best move based on most visits (more robust than win ratio)
     best_move = None
     best_visits = -1
     
     for move, child in root.children.items():
+        print(f"Move {move}: {child.wins}/{child.visits} = {child.wins/child.visits if child.visits > 0 else 0:.3f}")
         if child.visits > best_visits:
             best_visits = child.visits
             best_move = move
@@ -128,16 +141,16 @@ def _select_and_expand(node):
 
 def _simulate(board, player):
     """Simulate a random game from the current board state."""
-    # Switch to the next player
+    # Start with the next player (opponent of the player who just moved)
     current_player = 3 - player  # Toggle between 1 and 2
     
     # Play until the game is over
     while True:
         # Check if the game is over
         if board.is_winner(1):
-            return 1  # Human wins
+            return 1  # Human/Player 1 wins
         elif board.is_winner(2):
-            return 2  # AI wins
+            return 2  # AI/Player 2 wins
         elif board.is_full():
             return 0  # Draw
         
