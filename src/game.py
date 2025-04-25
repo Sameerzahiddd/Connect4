@@ -15,7 +15,7 @@ class Game:
     AI_PLAYER = 2
     AI_THINKING_TIME = 2  # Delay in seconds
     
-    def __init__(self, ai_type="minimax", first_ai=None, second_ai=None, first_player=1):
+    def __init__(self, ai_type="minimax", first_ai=None, second_ai=None, first_player=1, difficulty="medium", first_ai_difficulty="medium", second_ai_difficulty="medium"):
         """
         Initialize the game.
         
@@ -24,13 +24,16 @@ class Game:
             first_ai: Type of first AI for battle mode ('minimax' or 'mcts')
             second_ai: Type of second AI for battle mode ('minimax' or 'mcts')
             first_player: Player who goes first (1 for human, 2 for AI)
+            difficulty: Difficulty level ('easy', 'medium', 'hard')
         """
         self.board = Board()
         self.ai_type = ai_type
-        self.current_player = first_player  # Changed to use first_player parameter
+        self.current_player = first_player
         self.winner = None
         self.ai_thinking = False
         self.ai_start_time = 0
+        self.difficulty = difficulty
+
         
         # For AI vs AI battle
         self.battle_mode = (ai_type == "battle")
@@ -38,6 +41,8 @@ class Game:
         self.second_ai = second_ai
         self.battle_delay = 1.0  # Delay between moves in battle mode (seconds)
         self.last_move_time = 0
+        self.first_ai_difficulty = first_ai_difficulty
+        self.second_ai_difficulty = second_ai_difficulty
         
         # Set up the GUI
         self.gui = GUI(self)
@@ -95,24 +100,43 @@ class Game:
         if self.winner is not None:
             return False
         
-        # Determine which AI to use based on current player in battle mode
+        # Determine which AI and difficulty to use
         current_ai = self.ai_type
-        if self.battle_mode:
-            current_ai = self.first_ai if self.current_player == 1 else self.second_ai
+        current_difficulty = self.difficulty
         
-        # Get the move from the appropriate AI
+        if self.battle_mode:
+            if self.current_player == 1:
+                current_ai = self.first_ai
+                current_difficulty = self.first_ai_difficulty
+            else:
+                current_ai = self.second_ai
+                current_difficulty = self.second_ai_difficulty
+        
+        # Get the move from the appropriate AI with appropriate difficulty
         col = None
         if current_ai == "minimax":
-            # Keep minimax settings the same
-            _, col = iterative_deepening_minimax(self.board, 5)
+            # Set depth based on difficulty
+            if current_difficulty == "easy":
+                depth = 2
+            elif current_difficulty == "medium":
+                depth = 3
+            else:  # "hard"
+                depth = 5
+            
+            _, col = iterative_deepening_minimax(self.board, depth)
         elif current_ai == "mcts":
-            # Increase MCTS settings, especially when it goes first
-            if self.battle_mode and self.current_player == 1:
-                # More computing power when MCTS goes first in battle mode
-                col = mcts_search(self.board, iterations=15000, max_time=10.0)
-            else:
-                # Regular MCTS settings otherwise
-                col = mcts_search(self.board, iterations=8000, max_time=6.0)
+            # Set MCTS parameters based on difficulty
+            if current_difficulty == "easy":
+                iterations = 1000
+                max_time = 0.5
+            elif current_difficulty == "medium":
+                iterations = 5000
+                max_time = 2.0
+            else:  # "hard"
+                iterations = 10000
+                max_time = 5.0
+            
+            col = mcts_search(self.board, iterations=iterations, max_time=max_time)
         
         if col is not None:
             return self.make_move(col)

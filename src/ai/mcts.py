@@ -18,7 +18,7 @@ class MCTSNode:
         # Important: Set player correctly based on the board state or parent
         self.player = board.current_player if hasattr(board, 'current_player') else (1 if parent and parent.player == 2 else 2)
     
-    def uct_select_child(self, exploration_weight=1.5):  # sqrt(2) is a common value
+    def uct_select_child(self, exploration_weight=1.0):  # sqrt(2) is a common value
         """Select a child node using the UCT formula."""
         # UCT = win_ratio + exploration_weight * sqrt(ln(parent_visits) / child_visits)
         log_visits = math.log(self.visits) if self.visits > 0 else 0
@@ -67,25 +67,22 @@ class MCTSNode:
             self.wins += 0.5  # Count draws as half-wins
 
 
-def mcts_search(board, iterations=10000, max_time=8.0):
+# In src/ai/mcts.py
+def mcts_search(board, iterations=1000, max_time=None):
     """
     Run Monte Carlo Tree Search to find the best move.
     
     Args:
         board: Current board state
         iterations: Maximum number of iterations to run
-        max_time: Maximum search time in seconds
+        max_time: Maximum search time in seconds (optional)
         
     Returns:
         best_move: The best move determined by MCTS
     """
-    # Create a deep copy to avoid modifying the original board
     root = MCTSNode(copy.deepcopy(board))
     
-    # Store whose turn it is at the root (important for simulation)
-    root_player = root.player
-    
-    # Set time limit
+    # Set time limit if specified
     end_time = None
     if max_time:
         end_time = time.time() + max_time
@@ -106,16 +103,11 @@ def mcts_search(board, iterations=10000, max_time=8.0):
         # 3. Backpropagation
         _backpropagate(node, result)
     
-    # Debug information
-    total_simulations = sum(child.visits for child in root.children.values())
-    print(f"MCTS completed {total_simulations} simulations across {len(root.children)} moves")
-    
-    # Select the best move based on most visits (more robust than win ratio)
+    # Select the best move based on visit count
     best_move = None
     best_visits = -1
     
     for move, child in root.children.items():
-        print(f"Move {move}: {child.wins}/{child.visits} = {child.wins/child.visits if child.visits > 0 else 0:.3f}")
         if child.visits > best_visits:
             best_visits = child.visits
             best_move = move
