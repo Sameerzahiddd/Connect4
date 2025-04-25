@@ -59,13 +59,11 @@ def display_menu(screen):
                     pygame.quit()
                     sys.exit()
 
-def get_first_player(screen, mode):
-    """Get who should play first."""
+def choose_first_player(screen):
+    """Display menu to choose who goes first."""
     # Colors
     BLACK = (0, 0, 0)
     WHITE = (255, 255, 255)
-    RED = (255, 0, 0)
-    YELLOW = (255, 255, 0)
     BLUE = (0, 0, 255)
     
     # Set up fonts
@@ -74,18 +72,15 @@ def get_first_player(screen, mode):
     option_font = pygame.font.SysFont('Arial', 36)
     
     # Title text
-    if mode == 3:  # AI vs AI
-        title = title_font.render('Who should play first?', True, BLUE)
-        option1 = option_font.render('1. Minimax AI (Red)', True, RED)
-        option2 = option_font.render('2. MCTS AI (Yellow)', True, YELLOW)
-    else:  # Human vs AI
-        title = title_font.render('Who should play first?', True, BLUE)
-        option1 = option_font.render('1. You (Red)', True, RED)
-        option2 = option_font.render('2. AI (Yellow)', True, YELLOW)
+    title = title_font.render('Who goes first?', True, BLUE)
+    title_rect = title.get_rect(center=(screen.get_width() // 2, 80))
     
-    title_rect = title.get_rect(center=(screen.get_width() // 2, 150))
-    option1_rect = option1.get_rect(center=(screen.get_width() // 2, 250))
-    option2_rect = option2.get_rect(center=(screen.get_width() // 2, 350))
+    # Option texts
+    option1 = option_font.render('1. You go first', True, BLACK)
+    option1_rect = option1.get_rect(center=(screen.get_width() // 2, 200))
+    
+    option2 = option_font.render('2. AI goes first', True, BLACK)
+    option2_rect = option2.get_rect(center=(screen.get_width() // 2, 250))
     
     # Draw everything
     screen.fill(WHITE)
@@ -104,11 +99,59 @@ def get_first_player(screen, mode):
             
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1:
-                    return 1  # Human/Minimax goes first
+                    return 1  # Human goes first
                 elif event.key == pygame.K_2:
-                    return 2  # AI/MCTS goes first
+                    return 2  # AI goes first
                 elif event.key == pygame.K_ESCAPE:
-                    return None  # Back to main menu
+                    pygame.quit()
+                    sys.exit()
+
+def choose_first_ai(screen):
+    """Display menu to choose which AI goes first in battle mode."""
+    # Colors
+    BLACK = (0, 0, 0)
+    WHITE = (255, 255, 255)
+    BLUE = (0, 0, 255)
+    
+    # Set up fonts
+    pygame.font.init()
+    title_font = pygame.font.SysFont('Arial', 48)
+    option_font = pygame.font.SysFont('Arial', 36)
+    
+    # Title text
+    title = title_font.render('Which AI goes first?', True, BLUE)
+    title_rect = title.get_rect(center=(screen.get_width() // 2, 80))
+    
+    # Option texts
+    option1 = option_font.render('1. Minimax (Red)', True, BLACK)
+    option1_rect = option1.get_rect(center=(screen.get_width() // 2, 200))
+    
+    option2 = option_font.render('2. MCTS (Yellow)', True, BLACK)
+    option2_rect = option2.get_rect(center=(screen.get_width() // 2, 250))
+    
+    # Draw everything
+    screen.fill(WHITE)
+    screen.blit(title, title_rect)
+    screen.blit(option1, option1_rect)
+    screen.blit(option2, option2_rect)
+    
+    pygame.display.flip()
+    
+    # Wait for user selection
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    return "minimax"  # Minimax goes first
+                elif event.key == pygame.K_2:
+                    return "mcts"  # MCTS goes first
+                elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
 
 def main():
     """Main entry point for the Connect Four game."""
@@ -126,20 +169,24 @@ def main():
         # Display menu and get user selection
         mode = display_menu(screen)
         
-        # Get who should play first
-        first_player = get_first_player(screen, mode)
-        
-        if first_player is None:
-            continue  # Back to main menu
+        # If it's a human vs AI game, ask who goes first
+        first_player = 1  # Default: Human goes first
+        if mode == 1 or mode == 2:  # Human vs AI modes
+            first_player = choose_first_player(screen)
         
         # Start the game with the selected mode
         if mode == 1:
             game = Game(ai_type="minimax", first_player=first_player)
         elif mode == 2:
             game = Game(ai_type="mcts", first_player=first_player)
-        else:  # mode == 3
-            # For AI vs AI, first_player=1 means minimax goes first, first_player=2 means MCTS goes first
-            game = Game(ai_type="battle", first_ai="minimax", second_ai="mcts", first_player=first_player)
+        else:  # mode == 3 (AI vs AI battle)
+            # Ask which AI should go first
+            first_ai = choose_first_ai(screen)
+            
+            # The second AI is whichever one isn't the first
+            second_ai = "mcts" if first_ai == "minimax" else "minimax"
+            
+            game = Game(ai_type="battle", first_ai=first_ai, second_ai=second_ai)
         
         # Run the game
         # If it returns True, we go back to the menu (handled by the outer loop)

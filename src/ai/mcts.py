@@ -67,7 +67,7 @@ class MCTSNode:
             self.wins += 0.5  # Count draws as half-wins
 
 
-def mcts_search(board, iterations=5000, max_time=2.0):
+def mcts_search(board, iterations=1000, max_time=2.0):
     """
     Run Monte Carlo Tree Search to find the best move.
     
