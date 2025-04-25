@@ -16,6 +16,12 @@ An implementation of Connect Four with an AI opponent using the Minimax algorith
 git https://github.com/Sameerzahiddd/Connect4
 cd Connect4
 ```
+### Alternative: If you have the project as a zip file and have unzipped it:
+
+1. Navigate into the folder:
+   ```bash
+   cd Connect4
+   ```
 
 ### 2. (Recommended) Create and activate a virtual environment
 
@@ -30,17 +36,6 @@ source venv/bin/activate  # On Windows use: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Alternative: If you have the project as a zip file and have unzipped it:
-
-1. Navigate into the folder:
-   ```bash
-   cd Connect4
-   ```
-2. (Optional but recommended) Set up and activate a virtual environment as shown above.
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
 
 ## Running the Game
 

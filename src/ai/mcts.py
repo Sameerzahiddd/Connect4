@@ -18,7 +18,7 @@ class MCTSNode:
         # Important: Set player correctly based on the board state or parent
         self.player = board.current_player if hasattr(board, 'current_player') else (1 if parent and parent.player == 2 else 2)
     
-    def uct_select_child(self, exploration_weight=1.41):  # sqrt(2) is a common value
+    def uct_select_child(self, exploration_weight=1.5):  # sqrt(2) is a common value
         """Select a child node using the UCT formula."""
         # UCT = win_ratio + exploration_weight * sqrt(ln(parent_visits) / child_visits)
         log_visits = math.log(self.visits) if self.visits > 0 else 0
@@ -67,7 +67,7 @@ class MCTSNode:
             self.wins += 0.5  # Count draws as half-wins
 
 
-def mcts_search(board, iterations=5000, max_time=3.0):
+def mcts_search(board, iterations=10000, max_time=8.0):
     """
     Run Monte Carlo Tree Search to find the best move.
     

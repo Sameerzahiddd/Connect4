@@ -103,9 +103,16 @@ class Game:
         # Get the move from the appropriate AI
         col = None
         if current_ai == "minimax":
+            # Keep minimax settings the same
             _, col = iterative_deepening_minimax(self.board, 5)
         elif current_ai == "mcts":
-            col = mcts_search(self.board, iterations=6000, max_time=5.0)
+            # Increase MCTS settings, especially when it goes first
+            if self.battle_mode and self.current_player == 1:
+                # More computing power when MCTS goes first in battle mode
+                col = mcts_search(self.board, iterations=15000, max_time=10.0)
+            else:
+                # Regular MCTS settings otherwise
+                col = mcts_search(self.board, iterations=8000, max_time=6.0)
         
         if col is not None:
             return self.make_move(col)
