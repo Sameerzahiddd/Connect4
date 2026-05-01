@@ -72,19 +72,20 @@ class GUI:
     def draw_piece_preview(self, screen):
         """Draw a preview of where the piece will be placed."""
         if self.game.current_player == self.game.HUMAN_PLAYER and self.game.winner is None:
-            # Get mouse position
+            # Keyboard cursor takes priority; fall back to mouse position
             mouse_x, _ = pygame.mouse.get_pos()
-            col = mouse_x // self.SQUARE_SIZE
-            
+            mouse_col = mouse_x // self.SQUARE_SIZE
+            col = self.game.selected_col if hasattr(self.game, 'selected_col') else mouse_col
+
             # Draw the preview piece at the top
             if 0 <= col < self.game.board.cols and self.game.board.is_valid_move(col):
                 x = col * self.SQUARE_SIZE + self.SQUARE_SIZE // 2
                 y = self.SQUARE_SIZE // 2
-                
+
                 pygame.draw.circle(
-                    screen, 
-                    self.RED, 
-                    (x, y), 
+                    screen,
+                    self.RED,
+                    (x, y),
                     self.SQUARE_SIZE // 2 - 5
                 )
     
