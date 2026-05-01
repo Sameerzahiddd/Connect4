@@ -131,23 +131,27 @@ def choose_difficulty(screen):
     
     option3 = option_font.render('3. Hard', True, BLACK)
     option3_rect = option3.get_rect(center=(screen.get_width() // 2, 300))
-    
+
+    option4 = option_font.render('4. Expert', True, BLACK)
+    option4_rect = option4.get_rect(center=(screen.get_width() // 2, 350))
+
     # Draw everything
     screen.fill(WHITE)
     screen.blit(title, title_rect)
     screen.blit(option1, option1_rect)
     screen.blit(option2, option2_rect)
     screen.blit(option3, option3_rect)
-    
+    screen.blit(option4, option4_rect)
+
     pygame.display.flip()
-    
+
     # Wait for user selection
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1:
                     return "easy"
@@ -155,6 +159,8 @@ def choose_difficulty(screen):
                     return "medium"
                 elif event.key == pygame.K_3:
                     return "hard"
+                elif event.key == pygame.K_4:
+                    return "expert"
                 elif event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
