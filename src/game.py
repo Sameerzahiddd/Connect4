@@ -33,6 +33,7 @@ class Game:
         self.ai_thinking = False
         self.ai_start_time = 0
         self.difficulty = difficulty
+        self.selected_col = 3  # keyboard-controlled column cursor, starts centre
 
         
         # For AI vs AI battle
@@ -201,6 +202,13 @@ class Game:
                             self.reset()
                     elif event.key == pygame.K_ESCAPE:  # Exit to main menu
                         return True
+                    elif not self.battle_mode and self.current_player == self.HUMAN_PLAYER and self.winner is None:
+                        if event.key == pygame.K_LEFT:
+                            self.selected_col = max(0, self.selected_col - 1)
+                        elif event.key == pygame.K_RIGHT:
+                            self.selected_col = min(self.board.cols - 1, self.selected_col + 1)
+                        elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                            self.make_move(self.selected_col)
             
             # AI's turn with delay
             current_time = time.time()
