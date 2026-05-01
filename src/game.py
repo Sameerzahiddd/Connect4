@@ -68,6 +68,8 @@ class Game:
         self.current_player = self.HUMAN_PLAYER
         self.winner = None
         self.ai_thinking = False
+        self.ai_start_time = 0
+        self.last_move_time = 0
     
     def make_move(self, col):
         """
