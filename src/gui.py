@@ -21,10 +21,15 @@ class GUI:
         self.WIDTH = game.board.cols * self.SQUARE_SIZE
         self.HEIGHT = (game.board.rows + 1) * self.SQUARE_SIZE  # +1 for the top row
         
-        # Load fonts
+        # Load fonts with cross-platform fallback
         pygame.font.init()
-        self.font = pygame.font.SysFont('Comic Sans MS', 30)
-        self.large_font = pygame.font.SysFont('Comic Sans MS', 60)
+        font_name = pygame.font.match_font('comicsansms,arial,freesans,dejavu') or ''
+        if font_name:
+            self.font = pygame.font.Font(font_name, 30)
+            self.large_font = pygame.font.Font(font_name, 60)
+        else:
+            self.font = pygame.font.SysFont(None, 30)
+            self.large_font = pygame.font.SysFont(None, 60)
     
     def draw_board(self, screen):
         """Draw the game board."""
