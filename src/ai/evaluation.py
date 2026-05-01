@@ -74,6 +74,9 @@ def _evaluate_window(window, player, opponent):
     
     # Defensive scoring - block opponent threats
     if opponent_count == 3 and empty_count == 1:
-        return -4  # Block immediate threat
-    
+        return -8  # Block immediate threat (increased weight)
+
+    if player_count == 1 and empty_count == 3:
+        return 1  # Early positional value
+
     return 0  # Neutral position
