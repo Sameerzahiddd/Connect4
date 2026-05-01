@@ -34,6 +34,9 @@ class Game:
         self.ai_start_time = 0
         self.ai_difficulty = difficulty
         self.selected_col = 3  # keyboard-controlled column cursor, starts centre
+        self.wins = 0
+        self.losses = 0
+        self.draws = 0
 
         
         # For AI vs AI battle
@@ -88,9 +91,14 @@ class Game:
             # Check for win
             if self.board.is_winner(self.current_player):
                 self.winner = self.current_player
+                if self.winner == self.HUMAN_PLAYER:
+                    self.wins += 1
+                else:
+                    self.losses += 1
             # Check for draw
             elif self.board.is_full():
                 self.winner = 0  # 0 indicates draw
+                self.draws += 1
             else:
                 self.switch_player()
         

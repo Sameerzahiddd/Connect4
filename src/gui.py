@@ -172,22 +172,35 @@ class GUI:
                         screen_coords[3],
                         width=5
                     )
+    def draw_score(self, screen):
+        """Draw the running win/loss/draw score in the top-right corner."""
+        if not self.game.battle_mode:
+            score_text = self.font.render(
+                f"W:{self.game.wins}  L:{self.game.losses}  D:{self.game.draws}",
+                True, self.WHITE
+            )
+            score_rect = score_text.get_rect(topright=(self.WIDTH - 10, 5))
+            screen.blit(score_text, score_rect)
+
     def draw(self, screen):
         """Draw the complete game UI."""
         # Fill background
         screen.fill(self.BLACK)
-        
+
         # Draw the board
         self.draw_board(screen)
-        
+
         # Draw piece preview
         self.draw_piece_preview(screen)
-        
+
         # Draw winning line (add this line)
         self.draw_winning_line(screen)
-        
+
         # Draw turn indicator
         self.draw_turn_indicator(screen)
-        
+
+        # Draw score counter
+        self.draw_score(screen)
+
         # Draw winner message if game is over
         self.draw_winner_message(screen)
