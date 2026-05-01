@@ -140,7 +140,8 @@ class GUI:
             else:
                 ai_type = self.game.ai_type.capitalize()
                 if self.game.ai_thinking:
-                    text = self.font.render(f"{ai_type} AI is thinking...", True, self.YELLOW)
+                    dots = '.' * ((pygame.time.get_ticks() // 500) % 4)
+                    text = self.font.render(f"{ai_type} AI thinking{dots}", True, self.YELLOW)
                 else:
                     text = self.font.render(f"{ai_type} AI's Turn", True, self.YELLOW)
             
