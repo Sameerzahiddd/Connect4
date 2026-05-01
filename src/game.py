@@ -120,8 +120,10 @@ class Game:
                 depth = 2
             elif current_difficulty == "medium":
                 depth = 3
-            else:  # "hard"
+            elif current_difficulty == "hard":
                 depth = 5
+            else:  # "expert"
+                depth = 7
             
             _, col = iterative_deepening_minimax(self.board, depth)
         elif current_ai == "mcts":
