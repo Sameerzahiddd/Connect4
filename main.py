@@ -3,16 +3,10 @@ import sys
 from src.game import Game
 from src.ai.minimax import iterative_deepening_minimax
 from src.ai.mcts import mcts_search
+from src.constants import BLUE, BLACK, RED, YELLOW, WHITE
 
 def display_menu(screen):
     """Display the game mode selection menu."""
-    # Colors
-    BLACK = (0, 0, 0)
-    WHITE = (255, 255, 255)
-    RED = (255, 0, 0)
-    YELLOW = (255, 255, 0)
-    BLUE = (0, 0, 255)
-    
     # Set up fonts
     pygame.font.init()
     title_font = pygame.font.SysFont('Arial', 48)
@@ -61,10 +55,6 @@ def display_menu(screen):
 
 def choose_first_player(screen):
     """Display menu to choose who goes first."""
-    # Colors
-    BLACK = (0, 0, 0)
-    WHITE = (255, 255, 255)
-    BLUE = (0, 0, 255)
     
     # Set up fonts
     pygame.font.init()
@@ -108,10 +98,6 @@ def choose_first_player(screen):
 
 def choose_difficulty(screen):
     """Display menu to choose AI difficulty."""
-    # Colors
-    BLACK = (0, 0, 0)
-    WHITE = (255, 255, 255)
-    BLUE = (0, 0, 255)
     
     # Set up fonts
     pygame.font.init()
@@ -162,10 +148,6 @@ def choose_difficulty(screen):
 
 def choose_first_ai(screen):
     """Display menu to choose which AI goes first in battle mode."""
-    # Colors
-    BLACK = (0, 0, 0)
-    WHITE = (255, 255, 255)
-    BLUE = (0, 0, 255)
     
     # Set up fonts
     pygame.font.init()
@@ -209,10 +191,6 @@ def choose_first_ai(screen):
 
 def choose_ai_difficulties(screen, first_ai, second_ai):
     """Choose difficulty for each AI in battle mode."""
-    # Colors
-    BLACK = (0, 0, 0)
-    WHITE = (255, 255, 255)
-    BLUE = (0, 0, 255)
     
     # Set up fonts
     pygame.font.init()
