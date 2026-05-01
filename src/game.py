@@ -37,6 +37,7 @@ class Game:
         self.wins = 0
         self.losses = 0
         self.draws = 0
+        self.move_count = 0
 
         
         # For AI vs AI battle
@@ -86,8 +87,9 @@ class Game:
             return False
         
         success = self.board.drop_piece(col, self.current_player)
-        
+
         if success:
+            self.move_count += 1
             # Check for win
             if self.board.is_winner(self.current_player):
                 self.winner = self.current_player

@@ -120,8 +120,9 @@ class GUI:
             )
             screen.blit(text, text_rect)
             
-            # Restart instruction - center below the winner message
-            restart_text = self.font.render("Press 'R' to Restart", True, self.BLACK)
+            # Restart instruction and move count
+            move_count = getattr(self.game, 'move_count', 0)
+            restart_text = self.font.render(f"Press 'R' to Restart  |  {move_count} moves", True, self.BLACK)
             restart_rect = restart_text.get_rect(
                 center=(self.WIDTH // 2, self.SQUARE_SIZE * 2 // 3)
             )
