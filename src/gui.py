@@ -30,11 +30,20 @@ class GUI:
         """Draw the game board."""
         # Draw blue background
         pygame.draw.rect(
-            screen, 
-            self.BLUE, 
+            screen,
+            self.BLUE,
             (0, self.SQUARE_SIZE, self.WIDTH, self.HEIGHT - self.SQUARE_SIZE)
         )
-        
+
+        # Draw column hover highlight
+        if self.game.winner is None and not self.game.battle_mode:
+            mouse_x, _ = pygame.mouse.get_pos()
+            hover_col = mouse_x // self.SQUARE_SIZE
+            if 0 <= hover_col < self.game.board.cols:
+                highlight = pygame.Surface((self.SQUARE_SIZE, self.HEIGHT - self.SQUARE_SIZE), pygame.SRCALPHA)
+                highlight.fill((255, 255, 255, 40))
+                screen.blit(highlight, (hover_col * self.SQUARE_SIZE, self.SQUARE_SIZE))
+
         # Draw empty circles for the grid
         for row in range(self.game.board.rows):
             for col in range(self.game.board.cols):
