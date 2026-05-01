@@ -1,4 +1,5 @@
 import pygame
+from src.game import ENABLE_MOVE_HINTS
 
 class GUI:
     """GUI for the Connect Four game."""
@@ -69,6 +70,12 @@ class GUI:
                     self.SQUARE_SIZE // 2 - 5
                 )
     
+    def draw_hint(self, screen):
+        """Draw a subtle green indicator on the AI-suggested best column."""
+        if ENABLE_MOVE_HINTS and self.game.hint_col is not None and self.game.winner is None:
+            x = self.game.hint_col * self.SQUARE_SIZE + self.SQUARE_SIZE // 2
+            pygame.draw.circle(screen, (0, 200, 0), (x, self.SQUARE_SIZE // 2), 8)
+
     def draw_piece_preview(self, screen):
         """Draw a preview of where the piece will be placed."""
         if self.game.current_player == self.game.HUMAN_PLAYER and self.game.winner is None:
@@ -120,8 +127,9 @@ class GUI:
             )
             screen.blit(text, text_rect)
             
-            # Restart instruction - center below the winner message
-            restart_text = self.font.render("Press 'R' to Restart", True, self.BLACK)
+            # Restart instruction and move count
+            move_count = getattr(self.game, 'move_count', 0)
+            restart_text = self.font.render(f"Press 'R' to Restart  |  {move_count} moves", True, self.BLACK)
             restart_rect = restart_text.get_rect(
                 center=(self.WIDTH // 2, self.SQUARE_SIZE * 2 // 3)
             )
@@ -172,22 +180,38 @@ class GUI:
                         screen_coords[3],
                         width=5
                     )
+    def draw_score(self, screen):
+        """Draw the running win/loss/draw score in the top-right corner."""
+        if not self.game.battle_mode:
+            score_text = self.font.render(
+                f"W:{self.game.wins}  L:{self.game.losses}  D:{self.game.draws}",
+                True, self.WHITE
+            )
+            score_rect = score_text.get_rect(topright=(self.WIDTH - 10, 5))
+            screen.blit(score_text, score_rect)
+
     def draw(self, screen):
         """Draw the complete game UI."""
         # Fill background
         screen.fill(self.BLACK)
-        
+
         # Draw the board
         self.draw_board(screen)
-        
+
         # Draw piece preview
         self.draw_piece_preview(screen)
-        
+
         # Draw winning line (add this line)
         self.draw_winning_line(screen)
-        
+
         # Draw turn indicator
         self.draw_turn_indicator(screen)
-        
+
+        # Draw score counter
+        self.draw_score(screen)
+
+        # Draw move hint if enabled
+        self.draw_hint(screen)
+
         # Draw winner message if game is over
         self.draw_winner_message(screen)
