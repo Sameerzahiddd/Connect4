@@ -337,9 +337,9 @@ def main():
         
         # Start the game with the selected mode
         if mode == 1:
-            game = Game(ai_type="minimax", first_player=first_player, difficulty=difficulty)
+            game = Game(ai_type="minimax", first_player=first_player, ai_difficulty=difficulty)
         elif mode == 2:
-            game = Game(ai_type="mcts", first_player=first_player, difficulty=difficulty)
+            game = Game(ai_type="mcts", first_player=first_player, ai_difficulty=difficulty)
         else:  # mode == 3 (AI vs AI battle)
             # Ask which AI should go first
             # In the main function where you call choose_ai_difficulties:

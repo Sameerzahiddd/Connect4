@@ -15,7 +15,7 @@ class Game:
     AI_PLAYER = 2
     AI_THINKING_TIME = 2  # Delay in seconds
     
-    def __init__(self, ai_type="minimax", first_ai=None, second_ai=None, first_player=1, difficulty="medium", first_ai_difficulty="medium", second_ai_difficulty="medium"):
+    def __init__(self, ai_type="minimax", first_ai=None, second_ai=None, first_player=1, ai_difficulty="medium", first_ai_difficulty="medium", second_ai_difficulty="medium"):
         """
         Initialize the game.
         
@@ -32,8 +32,12 @@ class Game:
         self.winner = None
         self.ai_thinking = False
         self.ai_start_time = 0
-        self.difficulty = difficulty
+        self.ai_difficulty = difficulty
         self.selected_col = 3  # keyboard-controlled column cursor, starts centre
+        self.wins = 0
+        self.losses = 0
+        self.draws = 0
+        self.move_count = 0
 
         
         # For AI vs AI battle
@@ -83,14 +87,20 @@ class Game:
             return False
         
         success = self.board.drop_piece(col, self.current_player)
-        
+
         if success:
+            self.move_count += 1
             # Check for win
             if self.board.is_winner(self.current_player):
                 self.winner = self.current_player
+                if self.winner == self.HUMAN_PLAYER:
+                    self.wins += 1
+                else:
+                    self.losses += 1
             # Check for draw
             elif self.board.is_full():
                 self.winner = 0  # 0 indicates draw
+                self.draws += 1
             else:
                 self.switch_player()
         
@@ -103,7 +113,7 @@ class Game:
         
         # Determine which AI and difficulty to use
         current_ai = self.ai_type
-        current_difficulty = self.difficulty
+        current_difficulty = self.ai_difficulty
         
         if self.battle_mode:
             if self.current_player == 1:
