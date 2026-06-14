@@ -7,6 +7,8 @@ from src.ai.minimax import iterative_deepening_minimax
 from src.ai.mcts import mcts_search
 from src.gui import GUI
 
+ENABLE_MOVE_HINTS = False
+
 class Game:
     """Connect Four game controller."""
     
@@ -38,6 +40,7 @@ class Game:
         self.losses = 0
         self.draws = 0
         self.move_count = 0
+        self.hint_col = None
 
         
         # For AI vs AI battle
@@ -222,6 +225,12 @@ class Game:
                         elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
                             self.make_move(self.selected_col)
             
+            # Compute hint for human player if flag is enabled
+            if ENABLE_MOVE_HINTS and not self.battle_mode and self.current_player == self.HUMAN_PLAYER and self.winner is None:
+                _, self.hint_col = iterative_deepening_minimax(self.board, 3)
+            else:
+                self.hint_col = None
+
             # AI's turn with delay
             current_time = time.time()
             

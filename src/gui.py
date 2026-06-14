@@ -1,4 +1,5 @@
 import pygame
+from src.game import ENABLE_MOVE_HINTS
 
 class GUI:
     """GUI for the Connect Four game."""
@@ -69,6 +70,12 @@ class GUI:
                     self.SQUARE_SIZE // 2 - 5
                 )
     
+    def draw_hint(self, screen):
+        """Draw a subtle green indicator on the AI-suggested best column."""
+        if ENABLE_MOVE_HINTS and self.game.hint_col is not None and self.game.winner is None:
+            x = self.game.hint_col * self.SQUARE_SIZE + self.SQUARE_SIZE // 2
+            pygame.draw.circle(screen, (0, 200, 0), (x, self.SQUARE_SIZE // 2), 8)
+
     def draw_piece_preview(self, screen):
         """Draw a preview of where the piece will be placed."""
         if self.game.current_player == self.game.HUMAN_PLAYER and self.game.winner is None:
@@ -202,6 +209,9 @@ class GUI:
 
         # Draw score counter
         self.draw_score(screen)
+
+        # Draw move hint if enabled
+        self.draw_hint(screen)
 
         # Draw winner message if game is over
         self.draw_winner_message(screen)
