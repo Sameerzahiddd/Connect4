@@ -9,6 +9,7 @@ class Board:
         self.cols = cols
         self.board = np.zeros((rows, cols), dtype=int)
         self.last_move = None
+        self.winning_pieces = []
     
     def get_cell(self, row, col):
         """Get the value at a specific cell."""
