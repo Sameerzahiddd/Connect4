@@ -1,17 +1,15 @@
 import pygame
+from src.constants import BLUE, BLACK, RED, YELLOW, WHITE, SQUARE_SIZE
 
 class GUI:
     """GUI for the Connect Four game."""
-    
-    # Colors
-    BLUE = (0, 0, 255)
-    BLACK = (0, 0, 0)
-    RED = (255, 0, 0)
-    YELLOW = (255, 255, 0)
-    WHITE = (255, 255, 255)
-    
-    # Dimensions
-    SQUARE_SIZE = 100
+
+    BLUE = BLUE
+    BLACK = BLACK
+    RED = RED
+    YELLOW = YELLOW
+    WHITE = WHITE
+    SQUARE_SIZE = SQUARE_SIZE
     
     def __init__(self, game):
         """Initialize the GUI."""
